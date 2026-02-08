@@ -1,8 +1,8 @@
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { useState } from 'react';
-import api from '../services/api.js';
+import api from '../services/api';
 import { toast } from 'react-toastify';
-import TicketDetailModal from './TicketDetailModal.jsx';
+import TicketDetailModal from './TicketDetailModal';
 import React from 'react';
 const KanbanBoard = ({ tickets, setTickets, projectId, currentUser }) => {
     const [selectedTicket, setSelectedTicket] = useState(null);
@@ -21,8 +21,8 @@ const KanbanBoard = ({ tickets, setTickets, projectId, currentUser }) => {
         movedTicket.status = destination.droppableId;
 
         let insertIndex = destination.index;
-        if (source.droppableId === destination.droppableId) {
-            insertIndex = destination.index > source.index ? destination.index : destination.index + 1;
+        if (source.droppableId === destination.droppableId && destination.index > source.index) {
+            insertIndex = destination.index;
         }
         newTickets.splice(insertIndex, 0, movedTicket);
 
@@ -33,7 +33,14 @@ const KanbanBoard = ({ tickets, setTickets, projectId, currentUser }) => {
             toast.success('Ticket moved');
         } catch (err) {
             toast.error('Failed to update ticket status');
+            // You could revert state here if you want
         }
+    };
+
+    const getPriorityStyle = (priority) => {
+        if (priority === 'high') return 'bg-red-100 text-red-800 border-red-200';
+        if (priority === 'medium') return 'bg-amber-100 text-amber-800 border-amber-200';
+        return 'bg-emerald-100 text-emerald-800 border-emerald-200';
     };
 
     return (
@@ -41,9 +48,12 @@ const KanbanBoard = ({ tickets, setTickets, projectId, currentUser }) => {
             <DragDropContext onDragEnd={onDragEnd}>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                     {['To Do', 'In Progress', 'Done'].map((status) => (
-                        <div key={status} className="bg-gray-100 rounded-lg p-4">
-                            <h3 className="font-semibold text-lg mb-4 pb-2 border-b">
-                                {status} ({tickets.filter((t) => t.status === status).length})
+                        <div key={status} className="bg-white rounded-xl shadow-sm border border-gray-200 p-5">
+                            <h3 className="font-semibold text-lg mb-5 pb-3 border-b border-gray-200 flex justify-between items-center">
+                                <span>{status}</span>
+                                <span className="text-gray-500 text-base">
+                                    {tickets.filter((t) => t.status === status).length}
+                                </span>
                             </h3>
 
                             <Droppable droppableId={status} isDropDisabled={!canDrag}>
@@ -51,7 +61,7 @@ const KanbanBoard = ({ tickets, setTickets, projectId, currentUser }) => {
                                     <div
                                         ref={provided.innerRef}
                                         {...provided.droppableProps}
-                                        className="min-h-[400px] space-y-3"
+                                        className="min-h-[450px] space-y-4"
                                     >
                                         {tickets
                                             .filter((ticket) => ticket.status === status)
@@ -68,27 +78,20 @@ const KanbanBoard = ({ tickets, setTickets, projectId, currentUser }) => {
                                                             {...(canDrag ? provided.draggableProps : {})}
                                                             {...(canDrag ? provided.dragHandleProps : {})}
                                                             onClick={() => setSelectedTicket(ticket)}
-                                                            className={`bg-white p-4 rounded shadow hover:shadow-lg transition ${canDrag ? 'cursor-grab active:cursor-grabbing' : 'cursor-pointer'
+                                                            className={`bg-white p-5 rounded-lg border border-gray-200 hover:border-blue-300 hover:shadow-md transition-all cursor-pointer ${canDrag ? 'cursor-grab active:cursor-grabbing' : ''
                                                                 }`}
                                                         >
-                                                            <div className="font-medium text-gray-900">{ticket.title}</div>
-                                                            <div className="text-sm text-gray-600 mt-1 line-clamp-2">
+                                                            <div className="font-medium text-gray-900 mb-2">{ticket.title}</div>
+                                                            <div className="text-sm text-gray-600 line-clamp-2 mb-4">
                                                                 {ticket.description || 'No description'}
                                                             </div>
-                                                            <div className="mt-3 flex flex-wrap justify-between items-center text-xs gap-2">
-                                                                <span
-                                                                    className={`px-2 py-1 rounded-full font-medium ${ticket.priority === 'high'
-                                                                            ? 'bg-red-100 text-red-800'
-                                                                            : ticket.priority === 'medium'
-                                                                                ? 'bg-yellow-100 text-yellow-800'
-                                                                                : 'bg-green-100 text-green-800'
-                                                                        }`}
-                                                                >
+                                                            <div className="flex flex-wrap justify-between items-center text-xs gap-3">
+                                                                <span className={`px-3 py-1 rounded-full text-xs font-semibold border ${getPriorityStyle(ticket.priority)}`}>
                                                                     {ticket.priority.toUpperCase()}
                                                                 </span>
                                                                 {ticket.assignee ? (
                                                                     <span className="text-gray-700 font-medium">
-                                                                        {ticket.assignee.name || ticket.assignee.email}
+                                                                        {ticket.assignee.name || ticket.assignee.email?.split('@')[0]}
                                                                     </span>
                                                                 ) : (
                                                                     <span className="text-gray-500 italic">Unassigned</span>

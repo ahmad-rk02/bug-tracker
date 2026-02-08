@@ -151,7 +151,7 @@ const Landing = () => {
       {/* FOOTER */}
       <footer className="py-12 text-center text-gray-500 border-t border-slate-800 bg-slate-950">
         <p className="text-sm">
-          © {new Date().getFullYear()} BugTracker. All rights reserved. Made with ❤️ by Ahmad.
+          © {new Date().getFullYear()} BugTracker. All rights reserved. Made by Ahmad Raza Khan.
         </p>
       </footer>
 

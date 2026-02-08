@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from 'react';
+import { useState, useEffect } from 'react';
 import api from '../services/api';
 import { toast } from 'react-toastify';
 import CommentSection from './CommentSection';
@@ -20,7 +20,6 @@ const TicketDetailModal = ({ ticket, onClose, onUpdate, onDelete, currentUser })
 
     const canEdit = isAdmin || isCreator || isAssignee;
     const canDelete = isAdmin || isCreator;
-    const canComment = isAdmin || currentUser.role === 'member';
 
     useEffect(() => {
         const fetchMembers = async () => {
@@ -65,105 +64,123 @@ const TicketDetailModal = ({ ticket, onClose, onUpdate, onDelete, currentUser })
     };
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-xl shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
-                <div className="p-6 border-b flex justify-between items-center">
-                    <h2 className="text-xl font-bold">Ticket Details</h2>
-                    <button onClick={onClose} className="text-2xl">✕</button>
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[92vh] overflow-y-auto border border-gray-200/70">
+                <div className="p-6 md:p-8 border-b flex justify-between items-center sticky top-0 bg-white z-10">
+                    <h2 className="text-2xl font-bold text-gray-900">Ticket Details</h2>
+                    <button onClick={onClose} className="text-3xl text-gray-500 hover:text-gray-800 leading-none">
+                        ×
+                    </button>
                 </div>
 
-                <div className="p-6 grid md:grid-cols-2 gap-6">
-                    <div className="space-y-4">
-                        <input
-                            name="title"
-                            value={formData.title}
-                            onChange={handleChange}
-                            disabled={!canEdit}
-                            className={`w-full border p-2 rounded ${!canEdit ? 'bg-gray-100' : ''}`}
-                        />
+                <div className="p-6 md:p-8 grid md:grid-cols-2 gap-8">
+                    <div className="space-y-5">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1.5">Title</label>
+                            <input
+                                name="title"
+                                value={formData.title}
+                                onChange={handleChange}
+                                disabled={!canEdit}
+                                className={`w-full px-4 py-2.5 border rounded-lg transition ${!canEdit ? 'bg-gray-100 text-gray-600 cursor-not-allowed' : 'focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+                                    }`}
+                            />
+                        </div>
 
-                        <textarea
-                            name="description"
-                            value={formData.description}
-                            onChange={handleChange}
-                            rows={4}
-                            disabled={!canEdit}
-                            className={`w-full border p-2 rounded ${!canEdit ? 'bg-gray-100' : ''}`}
-                        />
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1.5">Description</label>
+                            <textarea
+                                name="description"
+                                value={formData.description}
+                                onChange={handleChange}
+                                rows={5}
+                                disabled={!canEdit}
+                                className={`w-full px-4 py-2.5 border rounded-lg transition resize-y min-h-[110px] ${!canEdit ? 'bg-gray-100 text-gray-600 cursor-not-allowed' : 'focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+                                    }`}
+                            />
+                        </div>
 
-                        <select
-                            name="priority"
-                            value={formData.priority}
-                            onChange={handleChange}
-                            disabled={!canEdit}
-                            className={`w-full border p-2 rounded ${!canEdit ? 'bg-gray-100' : ''}`}
-                        >
-                            <option value="low">Low</option>
-                            <option value="medium">Medium</option>
-                            <option value="high">High</option>
-                        </select>
+                        <div className="grid grid-cols-2 gap-5">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1.5">Priority</label>
+                                <select
+                                    name="priority"
+                                    value={formData.priority}
+                                    onChange={handleChange}
+                                    disabled={!canEdit}
+                                    className={`w-full px-4 py-2.5 border rounded-lg bg-white transition ${!canEdit ? 'bg-gray-100 text-gray-600 cursor-not-allowed' : 'focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+                                        }`}
+                                >
+                                    <option value="low">Low</option>
+                                    <option value="medium">Medium</option>
+                                    <option value="high">High</option>
+                                </select>
+                            </div>
 
-                        <select
-                            name="status"
-                            value={formData.status}
-                            onChange={handleChange}
-                            disabled={!canEdit}
-                            className={`w-full border p-2 rounded ${!canEdit ? 'bg-gray-100' : ''}`}
-                        >
-                            <option value="To Do">To Do</option>
-                            <option value="In Progress">In Progress</option>
-                            <option value="Done">Done</option>
-                        </select>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1.5">Status</label>
+                                <select
+                                    name="status"
+                                    value={formData.status}
+                                    onChange={handleChange}
+                                    disabled={!canEdit}
+                                    className={`w-full px-4 py-2.5 border rounded-lg bg-white transition ${!canEdit ? 'bg-gray-100 text-gray-600 cursor-not-allowed' : 'focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+                                        }`}
+                                >
+                                    <option value="To Do">To Do</option>
+                                    <option value="In Progress">In Progress</option>
+                                    <option value="Done">Done</option>
+                                </select>
+                            </div>
+                        </div>
 
-                        <select
-                            name="assignee"
-                            value={formData.assignee}
-                            onChange={handleChange}
-                            disabled={!canEdit || !isAdmin}
-                            className={`w-full border p-2 rounded ${!canEdit || !isAdmin ? 'bg-gray-100' : ''}`}
-                        >
-                            <option value="">Unassigned</option>
-                            {projectMembers.map((m) => (
-                                <option key={m._id} value={m._id}>
-                                    {m.name}
-                                </option>
-                            ))}
-                        </select>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1.5">Assignee</label>
+                            <select
+                                name="assignee"
+                                value={formData.assignee}
+                                onChange={handleChange}
+                                disabled={!canEdit || !isAdmin}
+                                className={`w-full px-4 py-2.5 border rounded-lg bg-white transition ${!canEdit || !isAdmin ? 'bg-gray-100 text-gray-600 cursor-not-allowed' : 'focus:ring-2 focus:ring-blue-500 focus:border-blue-500'
+                                    }`}
+                            >
+                                <option value="">Unassigned</option>
+                                {projectMembers.map((m) => (
+                                    <option key={m._id} value={m._id}>
+                                        {m.name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
 
                         {canEdit && (
-                            <div className="flex gap-3 mt-4">
+                            <div className="flex gap-4 mt-8">
                                 <button
                                     onClick={handleSave}
-                                    className="flex-1 bg-blue-600 text-white p-3 rounded hover:bg-blue-700"
+                                    className="flex-1 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 font-medium transition shadow-sm"
                                 >
-                                    Save
+                                    Save Changes
                                 </button>
                                 {canDelete && (
                                     <button
                                         onClick={handleDelete}
-                                        className="flex-1 bg-red-600 text-white p-3 rounded hover:bg-red-700"
+                                        className="flex-1 bg-red-600 text-white py-3 rounded-lg hover:bg-red-700 font-medium transition shadow-sm"
                                     >
-                                        Delete
+                                        Delete Ticket
                                     </button>
                                 )}
                             </div>
                         )}
 
                         {!canEdit && (
-                            <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded text-yellow-800 text-center">
-                                You can only view this ticket.
+                            <div className="mt-6 p-4 bg-yellow-50 border border-yellow-200 rounded-lg text-yellow-800 text-center">
+                                You have view-only access to this ticket.
                             </div>
                         )}
                     </div>
 
                     <div>
-                        {canComment ? (
-                            <CommentSection ticketId={ticket._id} currentUser={currentUser} />
-                        ) : (
-                            <div className="p-4 bg-gray-50 rounded-lg text-gray-600 text-center">
-                                Comments are read-only in viewer mode.
-                            </div>
-                        )}
+                        <CommentSection ticketId={ticket._id} currentUser={currentUser} />
                     </div>
                 </div>
             </div>
